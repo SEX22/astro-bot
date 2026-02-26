@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Твой Гороскоп 2026</title>
-    <!-- Подключаем SDK Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -12,80 +11,72 @@
         
         body {
             font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(180deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             color: #e2e8f0;
             min-height: 100vh;
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
         }
 
         .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 28px;
+            border-radius: 32px;
         }
 
         .zodiac-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
+            gap: 10px;
         }
 
         .zodiac-btn {
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s ease;
             cursor: pointer;
             border: 1px solid rgba(255, 255, 255, 0.05);
             background: rgba(255, 255, 255, 0.02);
+            text-align: center;
         }
 
         .zodiac-btn.active {
-            background: rgba(99, 102, 241, 0.2);
-            border-color: rgba(99, 102, 241, 0.5);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .premium-btn {
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            color: white;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            background: rgba(99, 102, 241, 0.3);
+            border-color: #6366f1;
+            transform: scale(1.05);
         }
 
         .tab-btn {
             position: relative;
+            padding-bottom: 8px;
             color: #94a3b8;
-            transition: color 0.3s;
+            transition: all 0.3s ease;
         }
 
         .tab-btn.active {
-            color: #6366f1;
+            color: #fff;
+            font-weight: 600;
         }
 
         .tab-btn.active::after {
             content: '';
             position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 4px;
-            border-radius: 2px;
+            bottom: 0;
+            left: 25%;
+            width: 50%;
+            height: 3px;
             background: #6366f1;
+            border-radius: 10px;
         }
 
         .loading-dots div {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background-color: #6366f1;
             border-radius: 50%;
             display: inline-block;
             animation: bounce 1.4s infinite ease-in-out both;
         }
-
         .loading-dots .dot1 { animation-delay: -0.32s; }
         .loading-dots .dot2 { animation-delay: -0.16s; }
 
@@ -93,56 +84,290 @@
             0%, 80%, 100% { transform: scale(0); }
             40% { transform: scale(1.0); }
         }
-
-        .secret-reveal {
-            animation: slideDown 0.5s ease forwards;
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        #errorPopup {
-            background: rgba(239, 68, 68, 0.9);
-            backdrop-filter: blur(10px);
-        }
     </style>
 </head>
-<body class="p-4 flex items-center justify-center">
-    <div class="max-w-md w-full mx-auto">
-        <!-- Сообщение об ошибке -->
-        <div id="errorPopup" class="hidden fixed top-4 left-4 right-4 z-[100] p-4 rounded-2xl text-white text-xs text-center shadow-xl">
-            Ошибка подключения к звездам. Проверь консоль.
-        </div>
-
-        <!-- Верхняя панель -->
-        <div class="flex justify-between items-center mb-6 px-2">
-            <div class="flex items-center space-x-3 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                <span class="text-[10px] text-indigo-300 font-semibold uppercase tracking-widest">Энергия</span>
-                <div class="flex space-x-1.5" id="energyBar">
-                    <div class="w-2.5 h-2.5 bg-indigo-500 rounded-full shadow-[0_0_8px_rgba(99,102,241,0.6)]"></div>
-                    <div class="w-2.5 h-2.5 bg-indigo-500 rounded-full shadow-[0_0_8px_rgba(99,102,241,0.6)]"></div>
-                    <div class="w-2.5 h-2.5 bg-indigo-500 rounded-full shadow-[0_0_8px_rgba(99,102,241,0.6)]"></div>
+<body class="p-4 flex flex-col items-center">
+    <div class="max-w-md w-full space-y-6 pt-4">
+        
+        <!-- Энергия -->
+        <div class="flex justify-between items-center px-2">
+            <div class="bg-black/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center space-x-3">
+                <span class="text-[10px] uppercase tracking-tighter text-indigo-300">Энергия</span>
+                <div id="energyBar" class="flex space-x-1">
+                    <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
                 </div>
             </div>
-            <div class="flex space-x-2">
-                <button onclick="tgRefillEnergy()" class="w-10 h-10 flex items-center justify-center bg-indigo-500/10 border border-indigo-500/30 rounded-full text-indigo-400">
-                    ✨
-                </button>
-            </div>
+            <button onclick="tgRefillEnergy()" class="text-xs text-indigo-300 bg-indigo-500/10 px-3 py-2 rounded-full border border-indigo-500/20">✨ Пополнить</button>
         </div>
 
-        <div class="glass p-8 shadow-2xl">
-            <header class="text-center mb-10">
-                <h1 class="text-2xl font-semibold text-white mb-1 tracking-tight">Астро Поток</h1>
-                <p id="userName" class="text-indigo-300/60 text-[10px] uppercase tracking-widest mb-2">Привет, путник</p>
-                <div class="h-[1px] w-12 bg-indigo-500/30 mx-auto"></div>
-            </header>
-
-            <div class="flex justify-around mb-10 border-b border-white/5 pb-2">
-                <button onclick="switchTab('forecast')" id="tab-forecast" class="tab-btn active text-sm font-medium">Прогноз</button>
-                <button onclick="switchTab('compatibility')" id="tab-compatibility" class="tab-btn text-sm font-medium">Совместимость</button>
+        <div class="glass p-6 shadow-2xl">
+            <!-- Вкладки -->
+            <div class="flex justify-center space-x-8 mb-8 border-b border-white/5">
+                <button onclick="switchTab('forecast')" id="tab-forecast" class="tab-btn active text-sm">Прогноз</button>
+                <button onclick="switchTab('compatibility')" id="tab-compatibility" class="tab-btn text-sm">Совместимость</button>
             </div>
 
-            <!-- Секция Прогноза -->
-            <div id="section-forecast" class="space-y-8">
+            <!-- СЕКЦИЯ: ПРОГНОЗ -->
+            <div id="section-forecast">
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-light text-white">Твой путь на сегодня</h2>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2 mb-6">
+                    <button onclick="setPeriod('today')" id="period-today" class="py-2 rounded-xl text-xs border border-white/10 bg-white/10 text-white">Сегодня</button>
+                    <button onclick="setPeriod('month')" id="period-month" class="py-2 rounded-xl text-xs border border-white/5 bg-white/5 text-gray-400">Месяц</button>
+                </div>
+
+                <div id="grid-forecast" class="zodiac-grid mb-8"></div>
+
+                <button onclick="handleAction()" id="btnAction" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95 text-xs uppercase tracking-widest">
+                    Получить прогноз
+                </button>
+            </div>
+
+            <!-- СЕКЦИЯ: СОВМЕСТИМОСТЬ -->
+            <div id="section-compatibility" class="hidden">
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-light text-white">Тайна союза</h2>
+                </div>
+
+                <p class="text-[10px] text-center text-gray-400 uppercase mb-4 tracking-widest">Выбери свой знак</p>
+                <div id="grid-comp1" class="zodiac-grid mb-6"></div>
+
+                <p class="text-[10px] text-center text-gray-400 uppercase mb-4 tracking-widest">Выбери знак партнера</p>
+                <div id="grid-comp2" class="zodiac-grid mb-8"></div>
+
+                <button onclick="handleAction()" id="btnActionComp" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95 text-xs uppercase tracking-widest">
+                    Проверить чувства
+                </button>
+            </div>
+
+            <!-- Результат -->
+            <div id="resultArea" class="mt-8 hidden border-t border-white/5 pt-6">
+                <div id="loadingIndicator" class="hidden text-center py-6">
+                    <div class="loading-dots mb-3">
+                        <div class="dot1"></div>
+                        <div class="dot2"></div>
+                        <div class="dot3"></div>
+                    </div>
+                    <p class="text-[10px] text-indigo-300/60 uppercase">Считываем ритмы планет...</p>
+                </div>
+
+                <div id="contentDisplay" class="hidden">
+                    <h3 id="resultHeader" class="text-center text-indigo-300 text-[10px] uppercase font-bold tracking-widest mb-4"></h3>
+                    <div id="resultBody" class="text-sm leading-relaxed text-gray-300 font-light italic"></div>
+                    
+                    <!-- Премиум -->
+                    <div id="premiumUpsell" class="mt-6 p-5 rounded-2xl bg-white/5 border border-white/10 text-center">
+                        <p class="text-[11px] text-gray-400 mb-4">Хочешь узнать секретный совет и "золотое" время удачи?</p>
+                        <button onclick="showPremium()" class="w-full py-3 bg-indigo-500/20 text-indigo-300 rounded-xl text-[10px] uppercase font-bold border border-indigo-500/30">
+                            Открыть секрет (10 ⭐)
+                        </button>
+                    </div>
+                    <div id="premiumResult" class="hidden mt-6 p-5 rounded-2xl bg-indigo-500/10 border border-indigo-500/30">
+                        <p id="premiumText" class="text-sm text-indigo-100 italic"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка -->
+    <div id="paymentModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-6">
+        <div class="glass max-w-sm w-full p-8 text-center space-y-6">
+            <span class="text-4xl">⭐</span>
+            <h4 class="text-lg text-white">Доступ к звездам</h4>
+            <p id="payText" class="text-sm text-gray-400"></p>
+            <button id="confirmPay" class="w-full bg-white text-black font-bold py-3 rounded-xl text-xs uppercase">Оплатить</button>
+            <button onclick="closeModal()" class="text-xs text-gray-500 uppercase">Отмена</button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram?.WebApp;
+        const apiKey = "AIzaSyCQ6qi-gIdEUeg34PNiJ_ogZeY9952di0Q";
+        
+        let energy = 3;
+        let currentTab = 'forecast';
+        let selectedPeriod = 'today';
+        let signSelf = null;
+        let signPartner = null;
+        let signForecast = null;
+
+        const signs = [
+            { name: "Овен", icon: "♈" }, { name: "Телец", icon: "♉" },
+            { name: "Близнецы", icon: "♊" }, { name: "Рак", icon: "♋" },
+            { name: "Лев", icon: "♌" }, { name: "Дева", icon: "♍" },
+            { name: "Весы", icon: "♎" }, { name: "Скорпион", icon: "♏" },
+            { name: "Стрелец", icon: "♐" }, { name: "Козерог", icon: "♑" },
+            { name: "Водолей", icon: "♒" }, { name: "Рыбы", icon: "♓" }
+        ];
+
+        function init() {
+            if(tg) {
+                tg.expand();
+                tg.ready();
+            }
+            renderAllGrids();
+            updateEnergyUI();
+        }
+
+        function renderAllGrids() {
+            const gF = document.getElementById('grid-forecast');
+            const gC1 = document.getElementById('grid-comp1');
+            const gC2 = document.getElementById('grid-comp2');
+
+            signs.forEach(s => {
+                gF.appendChild(createBtn(s, (name) => {
+                    signForecast = name;
+                    updateVisualSelect('grid-forecast', name);
+                }));
+                gC1.appendChild(createBtn(s, (name) => {
+                    signSelf = name;
+                    updateVisualSelect('grid-comp1', name);
+                }));
+                gC2.appendChild(createBtn(s, (name) => {
+                    signPartner = name;
+                    updateVisualSelect('grid-comp2', name);
+                }));
+            });
+        }
+
+        function createBtn(sign, onClick) {
+            const d = document.createElement('div');
+            d.className = "zodiac-btn p-2 rounded-xl flex flex-col items-center justify-center";
+            d.dataset.name = sign.name;
+            d.innerHTML = `<span class="text-xl mb-1">${sign.icon}</span><span class="text-[8px] uppercase text-gray-500">${sign.name}</span>`;
+            d.onclick = () => {
+                onClick(sign.name);
+                if(tg) tg.HapticFeedback.impactOccurred('light');
+            };
+            return d;
+        }
+
+        function updateVisualSelect(gridId, name) {
+            document.querySelectorAll(`#${gridId} .zodiac-btn`).forEach(b => {
+                b.classList.toggle('active', b.dataset.name === name);
+            });
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('section-forecast').classList.toggle('hidden', tab !== 'forecast');
+            document.getElementById('section-compatibility').classList.toggle('hidden', tab !== 'compatibility');
+            document.getElementById('tab-forecast').classList.toggle('active', tab === 'forecast');
+            document.getElementById('tab-compatibility').classList.toggle('active', tab === 'compatibility');
+            document.getElementById('resultArea').classList.add('hidden');
+        }
+
+        function setPeriod(p) {
+            selectedPeriod = p;
+            document.getElementById('period-today').className = p === 'today' ? "py-2 rounded-xl text-xs border border-white/10 bg-white/10 text-white" : "py-2 rounded-xl text-xs border border-white/5 bg-white/5 text-gray-400";
+            document.getElementById('period-month').className = p === 'month' ? "py-2 rounded-xl text-xs border border-white/10 bg-white/10 text-white" : "py-2 rounded-xl text-xs border border-white/5 bg-white/5 text-gray-400";
+        }
+
+        function updateEnergyUI() {
+            const dots = document.getElementById('energyBar').children;
+            for(let i=0; i<3; i++) {
+                dots[i].style.opacity = i < energy ? "1" : "0.2";
+            }
+        }
+
+        function tgRefillEnergy() {
+            openModal("Пополнить запасы энергии на 3 вопроса?", () => {
+                energy = 3;
+                updateEnergyUI();
+                closeModal();
+            });
+        }
+
+        function openModal(text, onConfirm) {
+            document.getElementById('payText').textContent = text;
+            document.getElementById('paymentModal').classList.remove('hidden');
+            document.getElementById('confirmPay').onclick = onConfirm;
+        }
+
+        function closeModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+        }
+
+        async function handleAction() {
+            if(energy <= 0) return tgRefillEnergy();
+            
+            let prompt = "";
+            let headerText = "";
+
+            if(currentTab === 'forecast') {
+                if(!signForecast) return;
+                prompt = `Дай краткий астрологический прогноз для знака ${signForecast} на ${selectedPeriod === 'today' ? 'сегодня' : 'этот месяц'}. Стиль: добрый мистик. Минимум воды.`;
+                headerText = `${signForecast} • ${selectedPeriod === 'today' ? 'СЕГОДНЯ' : 'МЕСЯЦ'}`;
+            } else {
+                if(!signSelf || !signPartner) return;
+                prompt = `Проанализируй совместимость знаков ${signSelf} и ${signPartner}. Коротко о чувствах и одном главном совете. Тон: бро-астролог.`;
+                headerText = `${signSelf} + ${signPartner}`;
+            }
+
+            energy--;
+            updateEnergyUI();
+            
+            const area = document.getElementById('resultArea');
+            const load = document.getElementById('loadingIndicator');
+            const content = document.getElementById('contentDisplay');
+            const body = document.getElementById('resultBody');
+            const head = document.getElementById('resultHeader');
+
+            area.classList.remove('hidden');
+            load.classList.remove('hidden');
+            content.classList.add('hidden');
+            document.getElementById('premiumUpsell').classList.remove('hidden');
+            document.getElementById('premiumResult').classList.add('hidden');
+
+            const text = await apiCall(prompt);
+            head.textContent = headerText;
+            body.innerHTML = text ? text.replace(/\n/g, '<br>') : "Звезды молчат...";
+            
+            load.classList.add('hidden');
+            content.classList.remove('hidden');
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        async function showPremium() {
+            openModal("Открыть тайное время и личный символ удачи?", async () => {
+                closeModal();
+                const upsell = document.getElementById('premiumUpsell');
+                const result = document.getElementById('premiumResult');
+                const pText = document.getElementById('premiumText');
+                
+                upsell.classList.add('hidden');
+                result.classList.remove('hidden');
+                pText.textContent = "Считываю...";
+
+                const sign = currentTab === 'forecast' ? signForecast : signSelf;
+                const prompt = `Напиши для знака ${sign}: 1) Одно конкретное "золотое" время удачи (чч:мм). 2) Твой символ силы на сегодня. Очень кратко.`;
+                const text = await apiCall(prompt);
+                pText.textContent = text || "Время удачи — прямо сейчас!";
+            });
+        }
+
+        async function apiCall(prompt) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: { parts: [{ text: "Ты — современный астролог. Твой стиль — добрый бро-мистик. Отвечай на русском." }] }
+                    })
+                });
+                const data = await res.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text;
+            } catch (e) { return null; }
+        }
+
+        init();
+    </script>
+</body>
+</html>
