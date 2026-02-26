@@ -94,9 +94,9 @@
             <div class="bg-black/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center space-x-3">
                 <span class="text-[10px] uppercase tracking-tighter text-indigo-300">Энергия</span>
                 <div id="energyBar" class="flex space-x-1">
-                    <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
-                    <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
-                    <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
                 </div>
             </div>
             <button onclick="tgRefillEnergy()" class="text-xs text-indigo-300 bg-indigo-500/10 px-3 py-2 rounded-full border border-indigo-500/20">✨ Пополнить</button>
@@ -133,10 +133,10 @@
                     <h2 class="text-xl font-light text-white">Тайна союза</h2>
                 </div>
 
-                <p class="text-[10px] text-center text-gray-400 uppercase mb-4 tracking-widest">Выбери свой знак</p>
+                <p class="text-[9px] text-center text-gray-400 uppercase mb-4 tracking-widest">Твой знак</p>
                 <div id="grid-comp1" class="zodiac-grid mb-6"></div>
 
-                <p class="text-[10px] text-center text-gray-400 uppercase mb-4 tracking-widest">Выбери знак партнера</p>
+                <p class="text-[9px] text-center text-gray-400 uppercase mb-4 tracking-widest">Знак партнера</p>
                 <div id="grid-comp2" class="zodiac-grid mb-8"></div>
 
                 <button onclick="handleAction()" id="btnActionComp" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95 text-xs uppercase tracking-widest">
@@ -276,10 +276,11 @@
         }
 
         function tgRefillEnergy() {
-            openModal("Пополнить запасы энергии на 3 вопроса?", () => {
+            openModal("Пополнить энергию на 3 новых вопроса?", () => {
                 energy = 3;
                 updateEnergyUI();
                 closeModal();
+                if(tg) tg.HapticFeedback.notificationOccurred('success');
             });
         }
 
@@ -305,12 +306,13 @@
                 headerText = `${signForecast} • ${selectedPeriod === 'today' ? 'СЕГОДНЯ' : 'МЕСЯЦ'}`;
             } else {
                 if(!signSelf || !signPartner) return;
-                prompt = `Проанализируй совместимость знаков ${signSelf} и ${signPartner}. Коротко о чувствах и одном главном совете. Тон: бро-астролог.`;
+                prompt = `Проанализируй совместимость знаков ${signSelf} и ${signPartner}. Коротко о чувствах и один главный совет для этой пары. Тон: бро-астролог.`;
                 headerText = `${signSelf} + ${signPartner}`;
             }
 
             energy--;
             updateEnergyUI();
+            if(tg) tg.HapticFeedback.impactOccurred('medium');
             
             const area = document.getElementById('resultArea');
             const load = document.getElementById('loadingIndicator');
@@ -326,7 +328,7 @@
 
             const text = await apiCall(prompt);
             head.textContent = headerText;
-            body.innerHTML = text ? text.replace(/\n/g, '<br>') : "Звезды молчат...";
+            body.innerHTML = text ? text.replace(/\n/g, '<br>') : "Звезды временно затуманены. Попробуй позже.";
             
             load.classList.add('hidden');
             content.classList.remove('hidden');
@@ -334,7 +336,7 @@
         }
 
         async function showPremium() {
-            openModal("Открыть тайное время и личный символ удачи?", async () => {
+            openModal("Открыть секретное время и символ силы на сегодня?", async () => {
                 closeModal();
                 const upsell = document.getElementById('premiumUpsell');
                 const result = document.getElementById('premiumResult');
@@ -342,12 +344,13 @@
                 
                 upsell.classList.add('hidden');
                 result.classList.remove('hidden');
-                pText.textContent = "Считываю...";
+                pText.textContent = "Считываю частоты Вселенной...";
 
                 const sign = currentTab === 'forecast' ? signForecast : signSelf;
-                const prompt = `Напиши для знака ${sign}: 1) Одно конкретное "золотое" время удачи (чч:мм). 2) Твой символ силы на сегодня. Очень кратко.`;
+                const prompt = `Напиши для знака ${sign}: 1) Точное время удачи сегодня (чч:мм). 2) Твой секретный символ силы. Очень коротко.`;
                 const text = await apiCall(prompt);
-                pText.textContent = text || "Время удачи — прямо сейчас!";
+                pText.textContent = text || "Твое время удачи наступает прямо сейчас!";
+                if(tg) tg.HapticFeedback.notificationOccurred('success');
             });
         }
 
@@ -359,7 +362,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         contents: [{ parts: [{ text: prompt }] }],
-                        systemInstruction: { parts: [{ text: "Ты — современный астролог. Твой стиль — добрый бро-мистик. Отвечай на русском." }] }
+                        systemInstruction: { parts: [{ text: "Ты — мудрый и современный астролог. Твой стиль — 'добрый бро-мистик'. Отвечай на русском." }] }
                     })
                 });
                 const data = await res.json();
